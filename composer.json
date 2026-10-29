@@ -1,0 +1,41 @@
+{
+  "name": "roogul/consent-by-roogul",
+  "description": "Lightweight, cache-friendly cookie consent for Craft CMS.",
+  "type": "craft-plugin",
+  "license": "MIT",
+  "keywords": ["craft", "cms", "craftcms", "craft-plugin", "cookie", "consent", "gdpr", "pecr", "consent-mode"],
+  "authors": [
+    {
+      "name": "ROOGUL",
+      "homepage": "https://roogul.com"
+    }
+  ],
+  "support": {
+    "docs": "https://github.com/roogul/consent-by-roogul/blob/main/README.md",
+    "issues": "https://github.com/roogul/consent-by-roogul/issues"
+  },
+  "require": {
+    "php": "^8.2",
+    "craftcms/cms": "^5.0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "roogul\\consent\\": "src/"
+    }
+  },
+  "extra": {
+    "handle": "consent-by-roogul",
+    "name": "Consent by ROOGUL",
+    "developer": "ROOGUL",
+    "developerUrl": "https://roogul.com",
+    "documentationUrl": "https://github.com/roogul/consent-by-roogul/blob/main/README.md",
+    "changelogUrl": "https://raw.githubusercontent.com/roogul/consent-by-roogul/main/CHANGELOG.md",
+    "class": "roogul\\consent\\Plugin"
+  },
+  "config": {
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true,
+      "craftcms/plugin-installer": true
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{# Identical for every visitor — visibility is decided client-side. #}
+<div id="consent" class="consent{{ not settings.darkMode ? ' consent--no-dark' }}">
+  {% if themeCss %}<style>{{ themeCss|raw }}</style>{% endif %}
+  <script type="application/json" id="consent-config">{{ configJson|raw }}</script>
+
+  <section class="consent__banner" data-consent-banner role="region" aria-labelledby="consent-title" hidden>
+    <div class="consent__inner">
+      <div class="consent__copy">
+        <h2 id="consent-title" class="consent__title">{{ settings.bannerTitle|t('site') }}</h2>
+        <p class="consent__text">
+          {{ settings.bannerText|t('site') }}
+          {% if settings.policyUrl %}
+            <a href="{{ url(settings.policyUrl) }}">{{ settings.policyLinkLabel|t('site') }}</a>
+          {% endif %}
+        </p>
+      </div>
+      <div class="consent__actions">
+        <button type="button" class="consent__btn consent__btn--ghost" data-consent-action="manage">{{ settings.manageLabel|t('site') }}</button>
+        <button type="button" class="consent__btn" data-consent-action="reject">{{ settings.rejectLabel|t('site') }}</button>
+        <button type="button" class="consent__btn" data-consent-action="accept">{{ settings.acceptLabel|t('site') }}</button>
+      </div>
+    </div>
+  </section>
+
+  <dialog class="consent__dialog" data-consent-dialog aria-labelledby="consent-dialog-title">
+    <form method="dialog">
+      <div class="consent__head">
+        <h2 id="consent-dialog-title" class="consent__title">{{ settings.preferencesTitle|t('site') }}</h2>
+        <button type="button" class="consent__close" data-consent-action="close" aria-label="{{ 'Close'|t('consent-by-roogul') }}">&times;</button>
+      </div>
+
+      {% for category in categories %}
+        <div class="consent__category">
+          <label class="consent__toggle">
+            <input type="checkbox" name="consent-category" value="{{ category.handle }}"{% if category.required %} checked disabled{% endif %}>
+            <span>{{ category.label|t('site') }}</span>
+            {% if category.required %}
+              <span class="consent__badge">{{ 'Always on'|t('consent-by-roogul') }}</span>
+            {% endif %}
+          </label>
+          {% if category.description %}
+            <p class="consent__desc">{{ category.description|t('site') }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <div class="consent__actions">
+        <button type="button" class="consent__btn consent__btn--ghost" data-consent-action="save">{{ settings.saveLabel|t('site') }}</button>
+        <button type="button" class="consent__btn" data-consent-action="reject">{{ settings.rejectLabel|t('site') }}</button>
+        <button type="button" class="consent__btn" data-consent-action="accept">{{ settings.acceptLabel|t('site') }}</button>
+      </div>
+    </form>
+  </dialog>
+</div>

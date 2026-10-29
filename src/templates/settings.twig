@@ -1,0 +1,269 @@
+{% extends '_layouts/cp' %}
+{% import '_includes/forms' as forms %}
+
+{% set title = plugin.name %}
+{% set fullPageForm = true %}
+{% set crumbs = [
+  { label: 'Settings'|t('app'), url: url('settings') },
+  { label: 'Plugins'|t('app'), url: url('settings/plugins') },
+] %}
+
+{% set categoryOptions = settings.categories|map(c => { label: c.label ~ ' (' ~ c.handle ~ ')', value: c.handle }) %}
+
+{# Flag a tab red when any of its fields failed validation #}
+{% set tabFields = {
+  general: ['enabled', 'autoInjectBanner', 'consentMode', 'version', 'cookieName', 'cookieDays'],
+  copy: ['bannerTitle', 'bannerText', 'policyUrl', 'policyLinkLabel', 'acceptLabel', 'rejectLabel', 'manageLabel', 'saveLabel', 'preferencesTitle'],
+  categories: ['categories'],
+  cookies: ['cookies'],
+  theme: ['bgColor', 'textColor', 'mutedColor', 'borderColor', 'buttonColor', 'buttonTextColor', 'radius', 'darkMode'],
+} %}
+{% set tabLabels = {
+  general: 'General'|t('consent-by-roogul'),
+  copy: 'Copy'|t('consent-by-roogul'),
+  categories: 'Categories'|t('consent-by-roogul'),
+  cookies: 'Cookies'|t('consent-by-roogul'),
+  theme: 'Theme'|t('consent-by-roogul'),
+} %}
+{% set tabs = {} %}
+{% for id, fields in tabFields %}
+  {% set hasErrors = fields|filter(f => settings.hasErrors(f))|length > 0 %}
+  {% set tabs = tabs|merge({ (id): { label: tabLabels[id], url: '#' ~ id, class: hasErrors ? 'error' : null } }) %}
+{% endfor %}
+
+{% block content %}
+  {{ actionInput('plugins/save-plugin-settings') }}
+  {{ hiddenInput('pluginHandle', plugin.handle) }}
+
+  {# ------------------------------------------------------------------ General #}
+  <div id="general">
+    {% namespace 'settings' %}
+      {{ forms.lightswitchField({
+        label: 'Enabled'|t('consent-by-roogul'),
+        name: 'enabled',
+        on: settings.enabled,
+      }) }}
+
+      {{ forms.lightswitchField({
+        label: 'Auto-inject banner'|t('consent-by-roogul'),
+        instructions: 'Adds the banner before `</body>` on every site page. Turn off to place `{{ craft.consent.banner() }}` yourself.'|t('consent-by-roogul'),
+        name: 'autoInjectBanner',
+        on: settings.autoInjectBanner,
+      }) }}
+
+      {{ forms.lightswitchField({
+        label: 'Google Consent Mode v2'|t('consent-by-roogul'),
+        instructions: 'Requires `{{ craft.consent.head() }}` in `<head>`, before GTM or gtag.js.'|t('consent-by-roogul'),
+        name: 'consentMode',
+        on: settings.consentMode,
+      }) }}
+
+      {{ forms.textField({
+        label: 'Consent version'|t('consent-by-roogul'),
+        instructions: 'Increase this to re-prompt every visitor, e.g. after adding a cookie to an optional category.'|t('consent-by-roogul'),
+        name: 'version',
+        type: 'number',
+        min: 1,
+        value: settings.version,
+        errors: settings.getErrors('version'),
+        size: 6,
+      }) }}
+
+      {{ forms.textField({
+        label: 'Cookie name'|t('consent-by-roogul'),
+        name: 'cookieName',
+        value: settings.cookieName,
+        errors: settings.getErrors('cookieName'),
+        code: true,
+      }) }}
+
+      {{ forms.textField({
+        label: 'Remember choice for (days)'|t('consent-by-roogul'),
+        name: 'cookieDays',
+        type: 'number',
+        min: 1,
+        max: 395,
+        value: settings.cookieDays,
+        errors: settings.getErrors('cookieDays'),
+        size: 6,
+      }) }}
+    {% endnamespace %}
+  </div>
+
+  {# --------------------------------------------------------------------- Copy #}
+  <div id="copy" class="hidden">
+    <p class="light">{{ 'Text is passed through the site translation category, so multi-site copy goes in `translations/<language>/site.php`.'|t('consent-by-roogul') }}</p>
+
+    {% namespace 'settings' %}
+      {{ forms.textField({ label: 'Banner title'|t('consent-by-roogul'), name: 'bannerTitle', value: settings.bannerTitle, errors: settings.getErrors('bannerTitle') }) }}
+      {{ forms.textareaField({ label: 'Banner text'|t('consent-by-roogul'), name: 'bannerText', value: settings.bannerText, rows: 3, errors: settings.getErrors('bannerText') }) }}
+      {{ forms.textField({ label: 'Cookie policy URL'|t('consent-by-roogul'), instructions: 'Absolute, or a path relative to the site, e.g. `cookie-policy`.'|t('consent-by-roogul'), name: 'policyUrl', value: settings.policyUrl }) }}
+      {{ forms.textField({ label: 'Policy link label'|t('consent-by-roogul'), name: 'policyLinkLabel', value: settings.policyLinkLabel }) }}
+      {{ forms.textField({ label: 'Accept button'|t('consent-by-roogul'), name: 'acceptLabel', value: settings.acceptLabel, errors: settings.getErrors('acceptLabel') }) }}
+      {{ forms.textField({ label: 'Reject button'|t('consent-by-roogul'), name: 'rejectLabel', value: settings.rejectLabel, errors: settings.getErrors('rejectLabel') }) }}
+      {{ forms.textField({ label: 'Manage button'|t('consent-by-roogul'), name: 'manageLabel', value: settings.manageLabel, errors: settings.getErrors('manageLabel') }) }}
+      {{ forms.textField({ label: 'Save button'|t('consent-by-roogul'), name: 'saveLabel', value: settings.saveLabel, errors: settings.getErrors('saveLabel') }) }}
+      {{ forms.textField({ label: 'Preferences title'|t('consent-by-roogul'), name: 'preferencesTitle', value: settings.preferencesTitle, errors: settings.getErrors('preferencesTitle') }) }}
+    {% endnamespace %}
+  </div>
+
+  {# --------------------------------------------------------------- Categories #}
+  <div id="categories" class="hidden">
+    {% namespace 'settings' %}
+      {{ forms.editableTableField({
+        label: 'Categories'|t('consent-by-roogul'),
+        instructions: 'Gate scripts with `data-consent="handle"`. Consent Mode is a comma-separated list of storage types, e.g. `analytics_storage`.'|t('consent-by-roogul'),
+        id: 'categories',
+        name: 'categories',
+        cols: {
+          handle: { heading: 'Handle'|t('consent-by-roogul'), type: 'singleline', code: true },
+          label: { heading: 'Label'|t('consent-by-roogul'), type: 'singleline' },
+          description: { heading: 'Description'|t('consent-by-roogul'), type: 'multiline' },
+          gtag: { heading: 'Consent Mode'|t('consent-by-roogul'), type: 'singleline', code: true },
+          required: { heading: 'Required'|t('consent-by-roogul'), type: 'lightswitch' },
+        },
+        rows: settings.categories,
+        allowAdd: true,
+        allowDelete: true,
+        allowReorder: true,
+        errors: settings.getErrors('categories'),
+      }) }}
+    {% endnamespace %}
+  </div>
+
+  {# ------------------------------------------------------------------ Cookies #}
+  <div id="cookies" class="hidden">
+    {% namespace 'settings' %}
+      {{ forms.editableTableField({
+        label: 'Declared cookies'|t('consent-by-roogul'),
+        instructions: 'Used for the policy table, cleanup on withdrawal, and dev-mode warnings. `*` is a wildcard, e.g. `_ga_*`. The consent cookie is added automatically. Save once after editing categories to refresh the category options.'|t('consent-by-roogul'),
+        id: 'cookies',
+        name: 'cookies',
+        cols: {
+          name: { heading: 'Name'|t('consent-by-roogul'), type: 'singleline', code: true },
+          provider: { heading: 'Provider'|t('consent-by-roogul'), type: 'singleline' },
+          category: { heading: 'Category'|t('consent-by-roogul'), type: 'select', options: categoryOptions },
+          purpose: { heading: 'Purpose'|t('consent-by-roogul'), type: 'multiline' },
+          duration: { heading: 'Duration'|t('consent-by-roogul'), type: 'singleline' },
+          party: { heading: 'Party'|t('consent-by-roogul'), type: 'select', options: [
+            { label: 'First'|t('consent-by-roogul'), value: 'first' },
+            { label: 'Third'|t('consent-by-roogul'), value: 'third' },
+          ] },
+        },
+        rows: settings.cookies,
+        allowAdd: true,
+        allowDelete: true,
+        allowReorder: true,
+        errors: settings.getErrors('cookies'),
+      }) }}
+    {% endnamespace %}
+  </div>
+
+  {# -------------------------------------------------------------------- Theme #}
+  <div id="theme" class="hidden">
+    <p class="light">{{ 'Leave a colour blank to use the default. For anything beyond this, override the CSS custom properties in your own stylesheet.'|t('consent-by-roogul') }}</p>
+
+    <div class="consent-theme">
+      <div class="consent-theme__fields">
+        {% namespace 'settings' %}
+          {{ forms.colorField({ label: 'Background'|t('consent-by-roogul'), name: 'bgColor', value: settings.bgColor, errors: settings.getErrors('bgColor') }) }}
+          {{ forms.colorField({ label: 'Text'|t('consent-by-roogul'), name: 'textColor', value: settings.textColor, errors: settings.getErrors('textColor') }) }}
+          {{ forms.colorField({ label: 'Secondary text'|t('consent-by-roogul'), instructions: 'Banner body and category descriptions.'|t('consent-by-roogul'), name: 'mutedColor', value: settings.mutedColor, errors: settings.getErrors('mutedColor') }) }}
+          {{ forms.colorField({ label: 'Borders'|t('consent-by-roogul'), name: 'borderColor', value: settings.borderColor, errors: settings.getErrors('borderColor') }) }}
+          {{ forms.colorField({ label: 'Button'|t('consent-by-roogul'), name: 'buttonColor', value: settings.buttonColor, errors: settings.getErrors('buttonColor') }) }}
+          {{ forms.colorField({ label: 'Button text'|t('consent-by-roogul'), name: 'buttonTextColor', value: settings.buttonTextColor, errors: settings.getErrors('buttonTextColor') }) }}
+
+          {{ forms.textField({
+            label: 'Corner radius (px)'|t('consent-by-roogul'),
+            name: 'radius',
+            type: 'number',
+            min: 0,
+            max: 64,
+            placeholder: '6',
+            value: settings.radius,
+            errors: settings.getErrors('radius'),
+            size: 4,
+          }) }}
+
+          {{ forms.lightswitchField({
+            label: 'Follow visitor dark mode'|t('consent-by-roogul'),
+            instructions: 'Swaps any colour left blank to a dark default when the visitor’s device is in dark mode. Turn off to always use the light defaults.'|t('consent-by-roogul'),
+            name: 'darkMode',
+            on: settings.darkMode,
+          }) }}
+        {% endnamespace %}
+      </div>
+
+      <div class="consent-theme__preview" aria-hidden="true">
+        <div class="heading"><label>{{ 'Preview'|t('consent-by-roogul') }}</label></div>
+        <div class="consent-theme__banner" data-preview>
+          <strong>{{ settings.bannerTitle }}</strong>
+          <p>{{ settings.bannerText }}</p>
+          <div class="consent-theme__buttons">
+            <span class="consent-theme__btn consent-theme__btn--ghost">{{ settings.manageLabel }}</span>
+            <span class="consent-theme__btn">{{ settings.rejectLabel }}</span>
+            <span class="consent-theme__btn">{{ settings.acceptLabel }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% css %}
+.consent-theme { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 32px; align-items: start; }
+@media (max-width: 1100px) { .consent-theme { grid-template-columns: 1fr; } }
+.consent-theme__preview { position: sticky; top: 24px; }
+.consent-theme__banner {
+  --bg: #fff; --fg: #111; --muted: #555; --border: #ddd; --btn: #111; --btn-fg: #fff; --r: 6px;
+  background: var(--bg); color: var(--fg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px; box-shadow: 0 8px 24px rgb(0 0 0 / 0.08); line-height: 1.5;
+}
+.consent-theme__banner strong { display: block; font-size: 15px; margin-bottom: 4px; }
+.consent-theme__banner p { margin: 0 0 16px; color: var(--muted); font-size: 13px; }
+.consent-theme__buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.consent-theme__btn {
+  font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: var(--r);
+  background: var(--btn); color: var(--btn-fg); border: 1px solid var(--btn);
+}
+.consent-theme__btn--ghost { background: transparent; color: var(--fg); border-color: var(--border); }
+{% endcss %}
+
+{% js %}
+(() => {
+  const preview = document.querySelector('[data-preview]');
+  if (!preview) return;
+
+  // setting => [preview var, default]
+  const map = {
+    bgColor: ['--bg', '#ffffff'],
+    textColor: ['--fg', '#111111'],
+    mutedColor: ['--muted', '#555555'],
+    borderColor: ['--border', '#dddddd'],
+    buttonColor: ['--btn', '#111111'],
+    buttonTextColor: ['--btn-fg', '#ffffff'],
+  };
+
+  const valid = (v) => /^#?([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v);
+
+  const update = () => {
+    Object.entries(map).forEach(([name, [cssVar, fallback]]) => {
+      const input = document.querySelector(`[name="settings[${name}]"]`);
+      const v = input ? input.value.trim() : '';
+      preview.style.setProperty(cssVar, valid(v) ? (v[0] === '#' ? v : '#' + v) : fallback);
+    });
+
+    const radius = document.querySelector('[name="settings[radius]"]');
+    const r = radius && radius.value !== '' ? parseInt(radius.value, 10) : 6;
+    preview.style.setProperty('--r', (isNaN(r) ? 6 : r) + 'px');
+  };
+
+  // Craft's colour picker updates the text input programmatically, so
+  // listen broadly and re-check shortly after any change.
+  const theme = document.getElementById('theme');
+  ['input', 'change', 'click', 'keyup'].forEach((ev) =>
+    theme.addEventListener(ev, () => requestAnimationFrame(update))
+  );
+  update();
+})();
+{% endjs %}

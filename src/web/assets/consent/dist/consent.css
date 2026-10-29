@@ -1,0 +1,197 @@
+/* Consent by ROOGUL — override any token on :root or .consent to theme it. */
+.consent {
+  --consent-bg: #fff;
+  --consent-fg: #111;
+  --consent-muted: #555;
+  --consent-border: #ddd;
+  --consent-btn-bg: #111;
+  --consent-btn-fg: #fff;
+  --consent-radius: 6px;
+  --consent-font: inherit;
+  --consent-z: 2147483000;
+  --consent-max: 64rem;
+
+  font-family: var(--consent-font);
+  color: var(--consent-fg);
+  line-height: 1.5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .consent:not(.consent--no-dark) {
+    --consent-bg: #161616;
+    --consent-fg: #f2f2f2;
+    --consent-muted: #aaa;
+    --consent-border: #333;
+    --consent-btn-bg: #f2f2f2;
+    --consent-btn-fg: #111;
+  }
+}
+
+.consent *,
+.consent *::before,
+.consent *::after { box-sizing: border-box; }
+
+.consent [hidden] { display: none !important; }
+
+.consent__banner {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: var(--consent-z);
+  padding: 1rem;
+  background: var(--consent-bg);
+  border-top: 1px solid var(--consent-border);
+  box-shadow: 0 -4px 24px rgb(0 0 0 / 0.08);
+}
+
+.consent__inner {
+  max-width: var(--consent-max);
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+}
+
+.consent__copy { flex: 1 1 28rem; }
+
+.consent__title {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.consent__text,
+.consent__desc {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--consent-muted);
+}
+
+.consent__text a { color: inherit; }
+
+.consent__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Accept and reject share one style — equal prominence. */
+.consent__btn {
+  appearance: none;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--consent-btn-bg);
+  border-radius: var(--consent-radius);
+  background: var(--consent-btn-bg);
+  color: var(--consent-btn-fg);
+  cursor: pointer;
+}
+
+.consent__btn--ghost {
+  background: transparent;
+  color: var(--consent-fg);
+  border-color: var(--consent-border);
+}
+
+.consent__btn:focus-visible,
+.consent__toggle input:focus-visible,
+.consent__close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.consent__dialog {
+  width: min(36rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  padding: 1.5rem;
+  border: 1px solid var(--consent-border);
+  border-radius: calc(var(--consent-radius) * 2);
+  background: var(--consent-bg);
+  color: var(--consent-fg);
+}
+
+.consent__dialog::backdrop { background: rgb(0 0 0 / 0.5); }
+
+.consent__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.consent__head .consent__title { font-size: 1.125rem; }
+
+.consent__close {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.consent__category {
+  padding: 0.875rem 0;
+  border-top: 1px solid var(--consent-border);
+}
+
+.consent__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.consent__toggle input {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  accent-color: var(--consent-btn-bg);
+}
+
+.consent__toggle input:disabled { cursor: not-allowed; }
+
+.consent__badge {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--consent-muted);
+}
+
+.consent__desc { margin-top: 0.25rem; padding-left: 1.75rem; }
+
+.consent__dialog .consent__actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--consent-border);
+  justify-content: flex-end;
+}
+
+/* Policy table */
+.consent-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+  font-size: 0.875rem;
+}
+
+.consent-table th,
+.consent-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5rem 0.75rem 0.5rem 0;
+  border-bottom: 1px solid currentColor;
+  border-bottom-color: color-mix(in srgb, currentColor 15%, transparent);
+}
+
+@media (max-width: 40rem) {
+  .consent__actions { width: 100%; }
+  .consent__actions .consent__btn { flex: 1 1 auto; }
+  .consent-table { overflow-x: auto; }
+}

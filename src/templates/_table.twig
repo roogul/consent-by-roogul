@@ -1,0 +1,34 @@
+<div class="consent-table">
+  {% for category in categories %}
+    {% set rows = cookies|filter(c => c.category == category.handle) %}
+    {% if rows|length %}
+      <h3>{{ category.label|t('site') }}</h3>
+      {% if category.description %}
+        <p>{{ category.description|t('site') }}</p>
+      {% endif %}
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'Cookie'|t('consent-by-roogul') }}</th>
+            <th scope="col">{{ 'Provider'|t('consent-by-roogul') }}</th>
+            <th scope="col">{{ 'Purpose'|t('consent-by-roogul') }}</th>
+            <th scope="col">{{ 'Duration'|t('consent-by-roogul') }}</th>
+            <th scope="col">{{ 'Type'|t('consent-by-roogul') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cookie in rows %}
+            <tr>
+              <td><code>{{ cookie.name }}</code></td>
+              <td>{{ cookie.provider }}</td>
+              <td>{{ cookie.purpose|t('site') }}</td>
+              <td>{{ cookie.duration|t('site') }}</td>
+              <td>{{ cookie.party == 'third' ? 'Third-party'|t('consent-by-roogul') : 'First-party'|t('consent-by-roogul') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  {% endfor %}
+  <p><a href="#" data-consent-open>{{ 'Change your cookie settings'|t('consent-by-roogul') }}</a></p>
+</div>
