@@ -97,7 +97,9 @@ document.addEventListener('consent:change', (e) => {
 
 **Settings → Plugins → Consent by ROOGUL → Theme** sets the background, text, secondary text, border, button and button-text colours, plus corner radius, with a live preview. Blank fields keep the defaults. *Follow visitor dark mode* controls whether blank fields switch to dark defaults on dark-mode devices.
 
-For anything beyond that, override the CSS custom properties in your own stylesheet:
+Button styles are scoped under `#consent` so they keep their fill and label colour when a host stylesheet (Tailwind Preflight, Bootstrap reboot, etc.) resets `button` after the plugin CSS loads.
+
+For anything beyond the Theme tab, override the CSS custom properties in your own stylesheet:
 
 ```css
 .consent {

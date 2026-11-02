@@ -75,29 +75,39 @@
   gap: 0.5rem;
 }
 
-/* Accept and reject share one style — equal prominence. */
-.consent__btn {
+/* Accept and reject share one style — equal prominence.
+   Scoped under #consent so we beat host-site button resets
+   (Tailwind Preflight’s `[type=button]{background-color:initial}`
+   is equal-specificity with a bare `.consent__btn`, and site CSS
+   usually loads after the plugin — leaving filled buttons
+   transparent with theme “button text” colour, i.e. invisible
+   black labels on a dark banner). */
+#consent .consent__btn {
   appearance: none;
+  -webkit-appearance: none;
   font: inherit;
   font-size: 0.875rem;
   font-weight: 600;
+  line-height: 1.25;
+  margin: 0;
   padding: 0.625rem 1rem;
   border: 1px solid var(--consent-btn-bg);
   border-radius: var(--consent-radius);
-  background: var(--consent-btn-bg);
+  background-color: var(--consent-btn-bg);
+  background-image: none;
   color: var(--consent-btn-fg);
   cursor: pointer;
 }
 
-.consent__btn--ghost {
-  background: transparent;
+#consent .consent__btn--ghost {
+  background-color: transparent;
   color: var(--consent-fg);
   border-color: var(--consent-border);
 }
 
-.consent__btn:focus-visible,
-.consent__toggle input:focus-visible,
-.consent__close:focus-visible {
+#consent .consent__btn:focus-visible,
+#consent .consent__toggle input:focus-visible,
+#consent .consent__close:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }
@@ -124,14 +134,18 @@
 
 .consent__head .consent__title { font-size: 1.125rem; }
 
-.consent__close {
+#consent .consent__close {
   appearance: none;
+  -webkit-appearance: none;
   border: 0;
   background: none;
+  background-color: transparent;
   color: inherit;
+  font: inherit;
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
+  margin: 0;
   padding: 0.25rem;
 }
 
@@ -192,6 +206,6 @@
 
 @media (max-width: 40rem) {
   .consent__actions { width: 100%; }
-  .consent__actions .consent__btn { flex: 1 1 auto; }
+  #consent .consent__actions .consent__btn { flex: 1 1 auto; }
   .consent-table { overflow-x: auto; }
 }
